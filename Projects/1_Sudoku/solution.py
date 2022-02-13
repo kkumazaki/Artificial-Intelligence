@@ -59,6 +59,22 @@ def naked_twins(values):
     # TODO: Implement this function!
     output = values.copy()
 
+    # It's more efficient to execute for each unit, rather than each box & peer
+    for unit in unitlist:
+        twin_candidates = [box for box in unit if len(output[box]) == 2]
+        #if twin_candidates!=[]:
+        #    print("-----------")
+        #    print(twin_candidates)
+        #    print(output[twin_candidates[0]])
+        if(len(twin_candidates)>1):
+            twin_number = output[twin_candidates[0]]
+            #print("Naked Twin exist! 1st num: " + str(twin_number[0]) + ", 2nd num: " + str(twin_number[1]))
+            #print(unit)
+            for peer in unit:
+                if (output[peer] in twin_number[0]):
+                    output[peer] = output[peer].replace(twin_number[0],"")
+                if (output[peer] in twin_number[1]):
+                    output[peer] = output[peer].replace(twin_number[1],"")
 
     return output
 
