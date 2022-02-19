@@ -1,6 +1,4 @@
-
 from utils import *
-
 
 row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
@@ -8,11 +6,12 @@ square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','45
 unitlist = row_units + column_units + square_units
 
 # TODO: Update the unit list to add the new diagonal units
-diag_units1 = [cross(rd, cd) for rd, cd in zip(rows, cols)]
-diag_units2 = [cross(rd, cd) for rd, cd in zip(reversed(rows), cols)]
-unitlist += diag_units1 + diag_units2
-#print(diag_units1)
-#print(diag_units2)
+diag_units1 = [rd+cd for (rd, cd) in zip(rows, cols)]
+diag_units2 = [rd+cd for (rd, cd) in zip(reversed(rows), cols)]
+
+unitlist.append(diag_units1)
+unitlist.append(diag_units2)
+#print(unitlist)
 
 # Must be called after all units (including diagonals) are added to the unitlist
 units = extract_units(unitlist, boxes)
@@ -62,24 +61,24 @@ def naked_twins(values):
     # It's more efficient to execute for each unit, rather than each box & peer
     for unit in unitlist:
         twin_candidates = [box for box in unit if len(output[box]) == 2]
-        if twin_candidates!=[]:
-            print("-----------")
-            print(twin_candidates)
+        #if twin_candidates!=[]:
+            #print("-----------")
+            #print(twin_candidates)
         if(len(twin_candidates)>1):
-            print("twin_candidate1: " + str(output[twin_candidates[0]]))    
-            print("twin_candidate2: " + str(output[twin_candidates[1]]))
+            #print("twin_candidate1: " + str(output[twin_candidates[0]]))    
+            #print("twin_candidate2: " + str(output[twin_candidates[1]]))
             if output[twin_candidates[0]] == output[twin_candidates[1]]:   
                 twin_number = output[twin_candidates[0]]
-                print("Naked Twin exist! 1st num: " + str(twin_number[0]) + ", 2nd num: " + str(twin_number[1]))
-                print(unit)
+                #print("Naked Twin exist! 1st num: " + str(twin_number[0]) + ", 2nd num: " + str(twin_number[1]))
+                #print(unit)
                 for peer in unit:
                     if (peer not in twin_candidates):
-                        print("before" + str(output[peer]))
+                        #print("before" + str(output[peer]))
                         if (output[peer] in twin_number[0]):
                             output[peer] = output[peer].replace(twin_number[0],"")
                         if (output[peer] in twin_number[1]):
                             output[peer] = output[peer].replace(twin_number[1],"")
-                        print("after" + str(output[peer]))
+                        #print("after" + str(output[peer]))
 
     return output
 
@@ -101,6 +100,7 @@ def eliminate(values):
         The values dictionary with the assigned values eliminated from peers
     """
     # TODO: Copy your code from the classroom to complete this function
+    # I use the solution code from Lesson
     solved_values = [box for box in values.keys() if len(values[box]) == 1]
 
     for box in solved_values:
@@ -132,6 +132,7 @@ def only_choice(values):
     You should be able to complete this function by copying your code from the classroom
     """
     # TODO: Copy your code from the classroom to complete this function
+    # I use the solution code from Lesson
     for unit in unitlist:
         for digit in '123456789':
             dplaces = [box for box in unit if digit in values[box]]
@@ -156,6 +157,7 @@ def reduce_puzzle(values):
         no longer produces any changes, or False if the puzzle is unsolvable 
     """
     # TODO: Copy your code from the classroom and modify it to complete this function
+    # I use the solution code from Lesson
     stalled = False
     while not stalled:
         # Check how many boxes have a determined value
@@ -197,6 +199,7 @@ def search(values):
     """
     # TODO: Copy your code from the classroom to complete this function
     # First, reduce the puzzle using the previous function
+    # I use the solution code from Lesson
     values = reduce_puzzle(values)
 
     if values is False:
@@ -234,8 +237,8 @@ def solve(grid):
 
 
 if __name__ == "__main__":
-    #diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
-    diag_sudoku_grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..'
+    diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+    #diag_sudoku_grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..'
     display(grid2values(diag_sudoku_grid))
     result = solve(diag_sudoku_grid)
     display(result)
