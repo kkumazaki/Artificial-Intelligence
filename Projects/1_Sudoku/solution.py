@@ -58,27 +58,56 @@ def naked_twins(values):
     # TODO: Implement this function!
     output = values.copy()
 
-    # It's more efficient to execute for each unit, rather than each box & peer
-    for unit in unitlist:
-        twin_candidates = [box for box in unit if len(output[box]) == 2]
-        #if twin_candidates!=[]:
-            #print("-----------")
-            #print(twin_candidates)
-        if(len(twin_candidates)>1):
-            #print("twin_candidate1: " + str(output[twin_candidates[0]]))    
-            #print("twin_candidate2: " + str(output[twin_candidates[1]]))
-            if output[twin_candidates[0]] == output[twin_candidates[1]]:   
-                twin_number = output[twin_candidates[0]]
-                #print("Naked Twin exist! 1st num: " + str(twin_number[0]) + ", 2nd num: " + str(twin_number[1]))
-                #print(unit)
-                for peer in unit:
-                    if (peer not in twin_candidates):
-                        #print("before" + str(output[peer]))
-                        if (output[peer] in twin_number[0]):
-                            output[peer] = output[peer].replace(twin_number[0],"")
-                        if (output[peer] in twin_number[1]):
-                            output[peer] = output[peer].replace(twin_number[1],"")
-                        #print("after" + str(output[peer]))
+    #(1) Execute for each unit, rather than each box & peer
+    # It worked well to get the answer, but unittest fails. I'd better to execute for every box & peer...
+    if 0: # Leave the old codes (It worked to get the answer, but there're fails in the unittest)
+        for unit in unitlist:
+            twin_candidates = [box for box in unit if len(output[box]) == 2]
+            #if twin_candidates!=[]:
+                #print("-----------")
+                #print(twin_candidates)
+            if(len(twin_candidates)>1):
+                #print("twin_candidate1: " + str(output[twin_candidates[0]]))    
+                #print("twin_candidate2: " + str(output[twin_candidates[1]]))
+                #if output[twin_candidates[0]] == output[twin_candidates[1]]: #before mentor helps
+                if sorted(output[twin_candidates[0]]) == sorted(output[twin_candidates[1]]):  #after mentor helps 
+                    twin_number = output[twin_candidates[0]]
+                    #print("Naked Twin exist! 1st num: " + str(twin_number[0]) + ", 2nd num: " + str(twin_number[1]))
+                    #print(unit)
+                    for peer in unit:
+                        if (peer not in twin_candidates):
+                            #print("before" + str(output[peer]))
+                            if (output[peer] in twin_number[0]):
+                                output[peer] = output[peer].replace(twin_number[0],"")
+                            if (output[peer] in twin_number[1]):
+                                output[peer] = output[peer].replace(twin_number[1],"")
+                            #print("after" + str(output[peer]))
+                            
+    #(2) Execute for every box & peer: Refered to the mentor's advice
+    twin_canditates = [box for box in output if len(output[box]) == 2]
+
+    naked_twins = [(twin_box, peer_box) for twin_box in twin_canditates for peer_box in peers[twin_box] \
+                    if sorted(output[twin_box]) == sorted(output[peer_box])]
+    #print("naked_twins")
+    #print(naked_twins)
+
+    for twins in naked_twins:
+        common_peers = set(peers[twins[0]]).intersection(peers[twins[1]])
+        #print("common_peers")
+        #print(common_peers)
+        #print("twins[0]")
+        #print(twins[0])
+        #print("peers[twin[0]]")
+        #print(peers[twins[0]])
+        #print("twins[1]")
+        #print(twins[1])
+        #print("peers[twin[1]]")
+        #print(peers[twins[1]])
+        #print("output[twins[0]]")
+        #print(output[twins[0]])       
+        for peer in common_peers:
+            for digit in output[twins[0]]:
+                output[peer] = output[peer].replace(digit,'')
 
     return output
 
