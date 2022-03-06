@@ -1,5 +1,7 @@
 
 from itertools import chain, combinations
+
+from matplotlib.pyplot import fill
 from aimacode.planning import Action
 from aimacode.utils import expr
 
@@ -20,7 +22,11 @@ class ActionLayer(BaseActionLayer):
         layers.ActionNode
         """
         # TODO: implement this function
-        raise NotImplementedError
+        for a in self.children[actionA]:
+            for b in self.children[actionB]:
+                if a == ~b:
+                    return True
+        return False
 
 
     def _interference(self, actionA, actionB):
@@ -35,7 +41,11 @@ class ActionLayer(BaseActionLayer):
         layers.ActionNode
         """
         # TODO: implement this function
-        raise NotImplementedError
+        for a in self.parents[actionA]:
+            for b in self.parents[actionB]:
+                if a == ~b:
+                    return True
+        return False
 
     def _competing_needs(self, actionA, actionB):
         """ Return True if any preconditions of the two actions are pairwise mutex in the parent layer
@@ -50,8 +60,11 @@ class ActionLayer(BaseActionLayer):
         layers.BaseLayer.parent_layer
         """
         # TODO: implement this function
-        raise NotImplementedError
-
+        for a in actionA.preconditions:
+            for b in actionB.preconditions:
+                if self.parent_layer.is_mutex(a, b):
+                    return True
+        return False  
 
 class LiteralLayer(BaseLiteralLayer):
 
@@ -67,12 +80,19 @@ class LiteralLayer(BaseLiteralLayer):
         layers.BaseLayer.parent_layer
         """
         # TODO: implement this function
-        raise NotImplementedError
+        for a in self.parents[literalA]:
+            for b in self.parents[literalB]:
+                if self.parent_layer.is_mutex(a, b):
+                    return True
+        return False  
 
     def _negation(self, literalA, literalB):
         """ Return True if two literals are negations of each other """
         # TODO: implement this function
-        raise NotImplementedError
+        if literalA == ~literalB:
+            return True
+        else:
+            return False
 
 
 class PlanningGraph:
@@ -110,6 +130,13 @@ class PlanningGraph:
         self.literal_layers = [layer]
         self.action_layers = []
 
+    # make a function according to the pseudo code
+    def level_cost(self):
+        for i in len(self.literal_layers):
+            if self.goal in self.literal_layers[i]:
+                return i
+        return 1000
+
     def h_levelsum(self):
         """ Calculate the level sum heuristic for the planning graph
 
@@ -136,7 +163,12 @@ class PlanningGraph:
         Russell-Norvig 10.3.1 (3rd Edition)
         """
         # TODO: implement this function
-        raise NotImplementedError
+        costs =[]
+        self.fill()
+        for g in self.goal:
+            costs.append(self.level_cost(self))
+        return sum(costs)
+
 
     def h_maxlevel(self):
         """ Calculate the max level heuristic for the planning graph
@@ -166,7 +198,11 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic with A*
         """
         # TODO: implement maxlevel heuristic
-        raise NotImplementedError
+        costs =[]
+        self.fill()
+        for g in self.goal:
+            costs.append(self.level_cost(self))
+        return max(costs)
 
     def h_setlevel(self):
         """ Calculate the set level heuristic for the planning graph
@@ -191,8 +227,26 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic on complex problems
         """
         # TODO: implement setlevel heuristic
-        raise NotImplementedError
-
+        costs =[]
+        self.fill()
+        i = 0
+        for layer in self.literal_layers:
+            i += 1
+            allGoalsMet = True
+            for g in self.goal:
+                if g not in layer:
+                    allGoalsMet = False
+            if not allGoalsMet:
+                continue
+            
+            goalsAreMutex = False
+            for ga in self.goal:
+                for gb in self.goal:
+                    if layer._mutexes(ga, gb):
+                        goalsAreMutex = True
+            if not goalsAreMutex:
+                return i
+                
     ##############################################################################
     #                     DO NOT MODIFY CODE BELOW THIS LINE                     #
     ##############################################################################

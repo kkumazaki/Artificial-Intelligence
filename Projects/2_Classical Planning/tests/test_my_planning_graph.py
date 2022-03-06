@@ -63,7 +63,7 @@ class Test_1_InconsistentEffectsMutex(BaseMutexTest):
             make_node(Action(expr('FakeAction(Y)'), [set([Y]), set()], [set([Y]), set()])),
         ]
 
-    def test_1a_inconsistent_effects_mutex(self):
+    def test_1a_mutex(self):
         acts = [self.actions[0], self.no_ops[0]]
         self.assertFalse(self.action_layer._inconsistent_effects(*acts), chain_dedent("""
             '{!s}' and '{!s}' should NOT be mutually exclusive by inconsistent effects.
