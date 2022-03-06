@@ -131,9 +131,9 @@ class PlanningGraph:
         self.action_layers = []
 
     # make a function according to the pseudo code
-    def level_cost(self):
-        for i in len(self.literal_layers):
-            if self.goal in self.literal_layers[i]:
+    def level_cost(self, goal):
+        for i in range(len(self.literal_layers)):
+            if goal in self.literal_layers[i]:
                 return i
         return 1000
 
@@ -166,7 +166,7 @@ class PlanningGraph:
         costs =[]
         self.fill()
         for g in self.goal:
-            costs.append(self.level_cost(self))
+            costs.append(self.level_cost(g))
         return sum(costs)
 
 
@@ -201,7 +201,7 @@ class PlanningGraph:
         costs =[]
         self.fill()
         for g in self.goal:
-            costs.append(self.level_cost(self))
+            costs.append(self.level_cost(g))
         return max(costs)
 
     def h_setlevel(self):
@@ -242,7 +242,7 @@ class PlanningGraph:
             goalsAreMutex = False
             for ga in self.goal:
                 for gb in self.goal:
-                    if layer._mutexes(ga, gb):
+                    if layer.is_mutex(ga, gb):
                         goalsAreMutex = True
             if not goalsAreMutex:
                 return i
