@@ -1,7 +1,4 @@
-
 from itertools import chain, combinations
-
-from matplotlib.pyplot import fill
 from aimacode.planning import Action
 from aimacode.utils import expr
 
@@ -22,6 +19,7 @@ class ActionLayer(BaseActionLayer):
         layers.ActionNode
         """
         # TODO: implement this function
+        # compare each children
         for a in self.children[actionA]:
             for b in self.children[actionB]:
                 if a == ~b:
@@ -41,10 +39,17 @@ class ActionLayer(BaseActionLayer):
         layers.ActionNode
         """
         # TODO: implement this function
+        # compare parents of a and children of b
         for a in self.parents[actionA]:
+            for b in self.children[actionB]:
+                if a == ~b:
+                    return True
+        #compare children of a and parents of b
+        for a in self.children[actionA]:
             for b in self.parents[actionB]:
                 if a == ~b:
                     return True
+      
         return False
 
     def _competing_needs(self, actionA, actionB):
@@ -59,7 +64,8 @@ class ActionLayer(BaseActionLayer):
         layers.ActionNode
         layers.BaseLayer.parent_layer
         """
-        # TODO: implement this function
+        # TODO: implement this functionx
+        # check mutex of preconditions of a and b
         for a in actionA.preconditions:
             for b in actionB.preconditions:
                 if self.parent_layer.is_mutex(a, b):
@@ -80,15 +86,20 @@ class LiteralLayer(BaseLiteralLayer):
         layers.BaseLayer.parent_layer
         """
         # TODO: implement this function
+        # check mutex of parents a and parents b
         for a in self.parents[literalA]:
             for b in self.parents[literalB]:
-                if self.parent_layer.is_mutex(a, b):
-                    return True
-        return False  
+        #        if self.parent_layer.is_mutex(a, b):
+        #            return True
+        #return False  
+                if not self.parent_layer.is_mutex(a, b):
+                    return False
+        return True
 
     def _negation(self, literalA, literalB):
         """ Return True if two literals are negations of each other """
         # TODO: implement this function
+        # check literal a and b
         if literalA == ~literalB:
             return True
         else:
@@ -131,11 +142,43 @@ class PlanningGraph:
         self.action_layers = []
 
     # make a function according to the pseudo code
-    def level_cost(self, goal):
-        for i in range(len(self.literal_layers)):
-            if goal in self.literal_layers[i]:
-                return i
-        return 1000
+    def level_cost(self):
+        #(1) pseudo code doesn't work
+        if 0:
+            for i in range(len(self.literal_layers)):
+                if self.goal in self.literal_layers[i]:
+                    return i
+            return 1000
+
+        #(2) calculate level cost
+        # initialize parameter
+        level = 0
+        costs = [0]
+        reach_goal = set()
+
+        # check whether each goal is in literal layer
+        for g in self.goal:
+            if g in self.literal_layers[0]:
+                reach_goal.add(g)
+
+        if not self.goal - reach_goal:
+            return costs
+
+        # repeat calculation until it's leveled
+        while not self._is_leveled:
+            # extend the layer
+            self._extend()
+            level += 1
+
+            # add costs and goal_reach for each goal if  it's in the literal layer
+            for g in (self.goal - reach_goal):
+                if g in self.literal_layers[level]:
+                    costs.append(level)
+                    reach_goal.add(g)
+
+            # return the cost
+            if not (self.goal - reach_goal):
+                return costs
 
     def h_levelsum(self):
         """ Calculate the level sum heuristic for the planning graph
@@ -163,12 +206,17 @@ class PlanningGraph:
         Russell-Norvig 10.3.1 (3rd Edition)
         """
         # TODO: implement this function
-        costs =[]
-        self.fill()
-        for g in self.goal:
-            costs.append(self.level_cost(g))
-        return sum(costs)
+        #(1) pseudo code doesn't work
+        if 0: 
+            costs =[]
+            self.fill()
+            for g in self.goal:
+                costs.append(self.level_cost(g))
+            return sum(costs)
 
+        #(2) simply sum the level_cost
+        costs = sum(self.level_cost())
+        return costs
 
     def h_maxlevel(self):
         """ Calculate the max level heuristic for the planning graph
@@ -198,11 +246,18 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic with A*
         """
         # TODO: implement maxlevel heuristic
-        costs =[]
-        self.fill()
-        for g in self.goal:
-            costs.append(self.level_cost(g))
-        return max(costs)
+        #(1) pseudo code doesn't work
+        if 0:
+            costs =[]
+            self.fill()
+            for g in self.goal:
+                costs.append(self.level_cost(g))
+            return max(costs)
+
+        #(2) simply take the max from level_cost
+        costs = max(self.level_cost())
+        return costs
+ 
 
     def h_setlevel(self):
         """ Calculate the set level heuristic for the planning graph
@@ -227,25 +282,65 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic on complex problems
         """
         # TODO: implement setlevel heuristic
-        costs =[]
-        self.fill()
-        i = 0
-        for layer in self.literal_layers:
-            i += 1
-            allGoalsMet = True
+        #(1) pseudo code doesn't work
+        if 0:
+            costs =[]
+            self.fill()
+            i = 0
+            for layer in self.literal_layers:
+                i += 1
+                allGoalsMet = True
+                for g in self.goal:
+                    if g not in layer:
+                        allGoalsMet = False
+                if not allGoalsMet:
+                    continue
+                
+                goalsAreMutex = False
+                for ga in self.goal:
+                    for gb in self.goal:
+                        if layer.is_mutex(ga, gb):
+                            goalsAreMutex = True
+                if not goalsAreMutex:
+                    return i
+
+        #(2) another way to calculate
+        costs = 0
+
+        # repeat calculation until it's leveled
+        while not self._is_leveled:
+
+            # initialize the parameters
+            reach_goal = True
+            mutex = False
+            layers = self.literal_layers[-1]
+
+            # check whether each goal is in the literal layers 
             for g in self.goal:
-                if g not in layer:
-                    allGoalsMet = False
-            if not allGoalsMet:
+                if g not in layers:
+                    reach_goal = False
+
+            # if goal is not reached, count up the costs
+            if reach_goal == False:
+                costs += 1
+                self._extend()
                 continue
             
-            goalsAreMutex = False
-            for ga in self.goal:
-                for gb in self.goal:
-                    if layer.is_mutex(ga, gb):
-                        goalsAreMutex = True
-            if not goalsAreMutex:
-                return i
+            # check if 2 goals are mutex
+            for x in self.goal:
+                for y in self.goal:
+                    if layers.is_mutex(x, y):
+                        mutex = True
+                    
+            # if there's no mutex, it's valid goal so return the costs
+            if mutex == False:
+                return costs
+            # otherwise, count up the cost and extend the layer
+            else:
+                costs += 1
+                self._extend()
+
+        return costs
                 
     ##############################################################################
     #                     DO NOT MODIFY CODE BELOW THIS LINE                     #
