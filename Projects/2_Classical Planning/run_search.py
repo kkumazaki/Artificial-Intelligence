@@ -47,6 +47,17 @@ SEARCHES = [["breadth_first_search", breadth_first_search, ""],
             ['astar_search', astar_search, 'h_pg_setlevel']
             ]
 
+# add a function to run all of problems and searches pairs
+def all():
+    #for p in range(1,3):
+    #    for s in range(1,12):
+    for p in range(3,5):
+        for s in [2,4,5,8,9]:
+            f = open('result.txt', 'a')
+            data_label = "\n problem:" +  str(p) + ", search: " +str(s) + "\n"
+            f.write(data_label)
+            f.close()
+            main([str(p)], [str(s)])
 
 def manual():
     print(PROBLEM_CHOICE_MSG)
@@ -86,6 +97,8 @@ if __name__=="__main__":
         "and informed heuristic search.")
     parser.add_argument('-m', '--manual', action="store_true",
                         help="Interactively select the problems and searches to run.")
+    # add an argument
+    parser.add_argument('-a', '--all', action="store_true", help="select all pairs of the problems and searches to run.")
     parser.add_argument('-p', '--problems', nargs="+", choices=range(1, len(PROBLEMS)+1), type=int, metavar='',
                         help="Specify the indices of the problems to solve as a list of space separated values. Choose from: {!s}".format(list(range(1, len(PROBLEMS)+1))))
     parser.add_argument('-s', '--searches', nargs="+", choices=range(1, len(SEARCHES)+1), type=int, metavar='',
@@ -94,6 +107,9 @@ if __name__=="__main__":
 
     if args.manual:
         manual()
+    # add a function
+    elif args.all:
+        all()
     elif args.problems and args.searches:
         main(list(sorted(set(args.problems))), list(sorted(set((args.searches)))))
     else:

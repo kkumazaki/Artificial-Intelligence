@@ -29,6 +29,12 @@ def run_search(problem, search_function, parameter=None):
     show_solution(node, end - start)
     print()
 
+    # save the results
+    f = open('result.txt', 'a')
+    f.write(str(ip))
+    f.write(str(end - start))
+    f.close()
+
 
 def show_solution(node, elapsed_time):
     print("Plan length: {}  Time elapsed in seconds: {}".format(len(node.solution()), elapsed_time))
