@@ -32,7 +32,7 @@ def run_search(problem, search_function, parameter=None):
     # save the results
     f = open('result.txt', 'a')
     f.write(str(ip))
-    f.write(str(end - start))
+    f.writelines([str(end - start), "        ", str(len(node.solution()))]) # add length for submission #2
     f.close()
 
 

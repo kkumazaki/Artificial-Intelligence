@@ -52,7 +52,7 @@ def all():
     #for p in range(1,3):
     #    for s in range(1,12):
     for p in range(3,5):
-        for s in [2,4,5,8,9]:
+        for s in [2,3,4,5,8,9]:
             f = open('result.txt', 'a')
             data_label = "\n problem:" +  str(p) + ", search: " +str(s) + "\n"
             f.write(data_label)
