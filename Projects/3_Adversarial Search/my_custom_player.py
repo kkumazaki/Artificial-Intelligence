@@ -23,12 +23,12 @@ class CustomPlayer(DataPlayer):
     **********************************************************************
     """
     # add init function
-    def __init__(self, player_id):
-      self.player_id = player_id
-      self.timer = None
-      self.queue = None
-      self.context = None
-      self.data = None
+    #def __init__(self, player_id):
+    #  self.player_id = player_id
+    #  self.timer = None
+    #  self.queue = None
+    #  self.context = None
+    #  self.data = None
 
 
     def get_action(self, state):
@@ -92,11 +92,6 @@ class CustomPlayer(DataPlayer):
 
     # add alpha-beta pruning function
     def alpha_beta_search(self, state, depth):
-        alpha = float("-inf")
-        beta = float("inf")
-        best_score = float("-inf")
-        best_move = None
-
         def min_value(state, alpha, beta, depth):
           if state.terminal_test():
             return state.utility(self.player_id)
@@ -125,8 +120,14 @@ class CustomPlayer(DataPlayer):
             alpha = max(alpha, value)
           return value
 
+        alpha = float("-inf")
+        beta = float("inf")
+        best_score = float("-inf")
+        #best_move = None
+        best_move = state.actions()[0] # need to set the default best_move, not None!
+
         for a in state.actions():
-          v = min_value(state.result(a), alpha, beta, depth)
+          v = min_value(state.result(a), alpha, beta, depth-1)
           alpha = max(alpha, v)
           if v > best_score:
             best_score = v

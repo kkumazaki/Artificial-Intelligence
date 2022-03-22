@@ -1,0 +1,18 @@
+[
+    {
+        "description": "2. CustomPlayer successfully completes a game against itself",
+        "advice": "",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/grader/adversarial_search/__utils.py\", line 202, in test\n    test_fn(*args, **kwargs)\n  File \"/home/grader/adversarial_search/__utils.py\", line 73, in test\n    test_fn(*args, **kwargs)\n  File \"/home/grader/adversarial_search/__utils.py\", line 354, in func_wrapper\n    return func(self)\n  File \"/home/grader/adversarial_search/tests/test_my_custom_player.py\", line 93, in test_custom_player\n    raise Exception(\"Your agent did not play until a terminal state.\")\nException: Your agent did not play until a terminal state.\n",
+        "result": "E",
+        "message": "",
+        "rubric_item_id": "11287"
+    },
+    {
+        "description": "1. get_action() calls self.queue.put() at least once before timeout",
+        "advice": "",
+        "traceback": "",
+        "result": ".",
+        "message": "",
+        "rubric_item_id": "11286"
+    }
+]
